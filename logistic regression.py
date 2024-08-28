@@ -295,6 +295,7 @@ class SGDLogisticRegression:
             ys = y[M]
             
             dw, db=self.gradient_loss(Xs, ys, weights, bias)
+
             bias=bias-lr*db
             weights=weights-lr*dw
             loss2=self.loss(X, y, weights, bias)
@@ -376,7 +377,6 @@ class AdamLogisticRegression:
         m_b=0
         v_b=0
         
-        t=0
         
         cumulative_time=np.zeros(epochs)
         
@@ -384,7 +384,6 @@ class AdamLogisticRegression:
         for k in range(epochs):
             
             start_time=time.time()
-            t=t+1
 
             dw, db=self.gradient_loss(X, y, weights, bias)
             
@@ -392,9 +391,9 @@ class AdamLogisticRegression:
             
             v_w=beta2*v_w+(1-beta2)*np.power(dw,2)
             
-            mhat_w=m_w/(1-beta1**t)
+            mhat_w=m_w/(1-beta1**(k+1))
             
-            vhat_w=v_w/(1-beta2**t)
+            vhat_w=v_w/(1-beta2**(k+1))
             
             weights=weights-lr*mhat_w/(np.sqrt(vhat_w)+eps)
             
@@ -403,9 +402,9 @@ class AdamLogisticRegression:
             
             v_b=beta2*v_b+(1-beta2)*db**2
             
-            mhat_b=m_b/(1-beta1**t)
+            mhat_b=m_b/(1-beta1**(k+1))
             
-            vhat_b=v_b/(1-beta2**t)
+            vhat_b=v_b/(1-beta2**(k+1))
             
             bias=bias-lr*mhat_b/(np.sqrt(vhat_b)+eps)
             
@@ -493,12 +492,12 @@ sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=cumulative_time_nesterov, label=
 sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=cumulative_time_sgd, label='SGD')
 sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=cumulative_time_adam, label='ADAM')
 
-plt.xlabel('Iteration')
+plt.xlabel('epochs')
 
 plt.ylabel('Time')
 
 
-plt.title("Logistic Regression Training CPU Time along iteration")
+plt.title("Logistic Regression Training CPU Time along epochs")
 
 fig.show()
 
@@ -510,12 +509,12 @@ sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=f1_nesterov, label='NGD')
 sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=f1_sgd, label='SGD')
 sns.lineplot(x=np.linspace(0,epochs+1,epochs),y=f1_adam, label='ADAM')
 
-plt.xlabel('Iteration')
+plt.xlabel('epochs')
 
 plt.ylabel('F1-score')
 
 
-plt.title("F1-score along iteration")
+plt.title("F1-score along epochs")
 
 fig.show()
 
