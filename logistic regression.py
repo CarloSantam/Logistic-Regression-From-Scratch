@@ -40,7 +40,8 @@ X_test=X_test[:,sorted_indices]
 sorted_pairs = sorted(zip(mi, feature_names),reverse=True)
 x_sorted, y_sorted = zip(*sorted_pairs)
 
-# Creare il grafico
+fig, axs = plt.subplots(1,figsize=(10, 5))
+
 sns.barplot(x=np.array(x_sorted)[1:Feature_selected], y=np.array(y_sorted)[1:Feature_selected])
 
 plt.xlabel('Mutual Information')
@@ -48,8 +49,6 @@ plt.xlabel('Mutual Information')
 plt.ylabel('Features')
 
 plt.show()
-
-#sns.barplot(x=mi, y=feature_names)
 
 
 np.random.seed(42)
@@ -279,7 +278,7 @@ class SGDLogisticRegression:
         db=-1/N*np.sum((y-yhat))
         return dw, db
         
-    def fit(self,X,y,X2,y2,lr, epochs,batch_size,threshold=0.5):
+    def fit(self,X,y,X2,y2,lr, epochs,batch_size=1,threshold=0.5):
         loss=randn(epochs)
         loss_val=randn(epochs)
         bias=rand(1)
@@ -325,7 +324,7 @@ class SGDLogisticRegression:
 
 logreg = SGDLogisticRegression()
 
-logreg.fit(X_train, y_train,X_test,y_test,lr,epochs,batch_size=1)
+logreg.fit(X_train, y_train,X_test,y_test,lr,epochs)
 
 y_SGD, loss_SGD,loss_val_sgd,cumulative_time_sgd,f1_sgd = logreg.predict(X_test,threshold=0.5)
 
@@ -364,7 +363,7 @@ class AdamLogisticRegression:
         db=-1/N*np.sum((y-yhat))
         return dw, db
         
-    def fit(self,X,y,X2,y2,lr, epochs,beta1,beta2,eps,threshold=0.5):
+    def fit(self,X,y,X2,y2,lr, epochs,beta1,beta2,eps,threshold=0.5, batch_size=len(X)):
         loss=randn(epochs)
         loss_val=randn(epochs)
         bias=rand(1)
@@ -384,8 +383,13 @@ class AdamLogisticRegression:
         for k in range(epochs):
             
             start_time=time.time()
-
-            dw, db=self.gradient_loss(X, y, weights, bias)
+            
+            M=np.random.choice(X.shape[0], size=batch_size)
+            
+            Xs = X[M,:]
+            ys = y[M]
+            
+            dw, db=self.gradient_loss(Xs, ys, weights, bias)
             
             m_w=beta1*m_w+(1-beta1)*dw
             
@@ -442,7 +446,7 @@ class AdamLogisticRegression:
   
 logreg = AdamLogisticRegression()
 
-logreg.fit(X_train, y_train,X_test,y_test,lr, epochs,beta1=0.9,beta2=0.99,eps=10**(-8))
+logreg.fit(X_train, y_train,X_test,y_test,lr, epochs,beta1=0.9,beta2=0.99,eps=10**(-8),batch_size=100)
 
 y_adam, loss_adam,loss_val_adam,cumulative_time_adam,f1_adam = logreg.predict(X_test,threshold=0.5)
 
